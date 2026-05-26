@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { features, testimonials, trustPoints } from '../data/homeContent.js';
+import { features, testimonials } from '../data/homeContent.js';
 import { fetchCategories } from '../services/categoryService.js';
 import { fetchBrands } from '../services/brandService.js';
 import { fetchProducts } from '../services/productService.js';
@@ -117,19 +117,6 @@ function HomePage({ authSession, navigate, onLogout }) {
                 alt="Premium lifestyle hero collage"
                 className="h-full w-full object-cover object-center"
               />
-            </div>
-          </div>
-
-          <div className="border-y border-brand-line bg-[#eef1fb]">
-            <div className="mx-auto grid max-w-7xl gap-4 px-4 py-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-10">
-              {trustPoints.map((item) => (
-                <div key={item.label} className="flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-brand-muted">
-                  <span className="text-brand-navy">
-                    <Icon name={item.icon} className="h-4 w-4" />
-                  </span>
-                  <span>{item.label}</span>
-                </div>
-              ))}
             </div>
           </div>
         </section>
