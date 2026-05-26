@@ -94,10 +94,6 @@ function RegisterHeader({ authSession, navigate, onLogout }) {
 
   return (
     <>
-      <aside className="bg-brand-navy px-4 py-2 text-center text-[10px] font-semibold tracking-[0.28em] text-white uppercase sm:text-[11px]">
-        Free Shipping on Orders Over ₹5,000 | Limited Time Seasonal Sale
-      </aside>
-
       <header className="sticky top-0 z-50 border-b border-brand-line/80 bg-white/92 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-4 sm:px-6 lg:px-10">
           <div className="flex items-center gap-10">
