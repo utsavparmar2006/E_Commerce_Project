@@ -1,0 +1,424 @@
+MERN E-COMMERCE DATABASE DESIGN
+================================
+
+Important decision
+------------------
+1. Keep user authentication data in the users collection.
+2. Keep addresses in a separate addresses collection.
+3. Do NOT take address on the register page.
+4. Take address later from profile page or checkout page.
+5. When order is placed, copy the selected address into the order document.
+
+
+1) USERS COLLECTION
+-------------------
+Purpose:
+- Store authentication and basic profile data.
+
+Fields:
+- _id
+- name: String, required
+- email: String, required, unique
+- password: String, required
+- phone: String, optional
+- avatar: String, optional
+- role: String, enum: user, admin
+- isVerified: Boolean, default false
+- isBlocked: Boolean, default false
+- createdAt
+- updatedAt
+
+Example:
+{
+  _id: ObjectId,
+  name: "Rahul",
+  email: "rahul@gmail.com",
+  password: "hashed_password",
+  phone: "9876543210",
+  avatar: "",
+  role: "user",
+  isVerified: false,
+  isBlocked: false
+}
+
+
+2) ADDRESSES COLLECTION
+-----------------------
+Purpose:
+- Store multiple saved addresses for one user.
+
+Fields:
+- _id
+- user: ObjectId, ref users, required
+- fullName: String, required
+- mobile: String, required
+- addressLine1: String, required
+- addressLine2: String, optional
+- landmark: String, optional
+- city: String, required
+- state: String, required
+- pincode: String, required
+- country: String, default India
+- addressType: String, enum: home, work, other
+- isDefault: Boolean, default false
+- createdAt
+- updatedAt
+
+Example:
+{
+  _id: ObjectId,
+  user: ObjectId,
+  fullName: "Rahul Sharma",
+  mobile: "9876543210",
+  addressLine1: "House 12, MG Road",
+  addressLine2: "Near Temple",
+  landmark: "Opposite market",
+  city: "Ahmedabad",
+  state: "Gujarat",
+  pincode: "380001",
+  country: "India",
+  addressType: "home",
+  isDefault: true
+}
+
+
+3) CATEGORIES COLLECTION
+------------------------
+Purpose:
+- Store product categories.
+
+Fields:
+- _id
+- name: String, required
+- slug: String, required, unique
+- image: String, optional
+- isFeatured: Boolean, default false
+- isDeleted: Boolean, default false
+- createdBy: ObjectId, optional
+- updatedBy: ObjectId, optional
+- createdAt
+- updatedAt
+
+
+4) BRANDS COLLECTION
+--------------------
+Purpose:
+- Store product brands.
+
+Fields:
+- _id
+- name: String, required
+- slug: String, required, unique
+- logo: String, optional
+- isFeatured: Boolean, default false
+- isDeleted: Boolean, default false
+- createdBy: ObjectId, optional
+- updatedBy: ObjectId, optional
+- createdAt
+- updatedAt
+
+
+5) PRODUCTS COLLECTION
+----------------------
+Purpose:
+- Store all product details.
+
+Fields:
+- _id
+- category: ObjectId, ref categories, required
+- brand: ObjectId, ref brands, optional
+- title: String, required
+- slug: String, required, unique
+- shortDescription: String, optional
+- description: String, required
+- sku: String, optional, unique
+- price: Number, required
+- discountPrice: Number, optional
+- stock: Number, default 0
+- sold: Number, default 0
+- averageRating: Number, default 0
+- totalReviews: Number, default 0
+- images: Array
+  - url: String
+  - alt: String
+  - isPrimary: Boolean
+- isFeatured: Boolean, default false
+- isActive: Boolean, default true
+- isDeleted: Boolean, default false
+- createdBy: ObjectId, optional
+- updatedBy: ObjectId, optional
+- createdAt
+- updatedAt
+
+Example:
+{
+  _id: ObjectId,
+  category: ObjectId,
+  brand: ObjectId,
+  title: "iPhone 15",
+  slug: "iphone-15",
+  shortDescription: "128GB mobile phone",
+  description: "Full product description",
+  sku: "IP15-128",
+  price: 75000,
+  discountPrice: 69999,
+  stock: 20,
+  sold: 3,
+  averageRating: 4.5,
+  totalReviews: 10,
+  images: [
+    { url: "img1.jpg", alt: "front view", isPrimary: true },
+    { url: "img2.jpg", alt: "side view", isPrimary: false }
+  ],
+  isFeatured: true,
+  isActive: true,
+  isDeleted: false
+}
+
+
+6) CARTS COLLECTION
+-------------------
+Purpose:
+- Store current shopping cart for each user.
+
+Fields:
+- _id
+- user: ObjectId, ref users, required, unique per user
+- items: Array
+  - product: ObjectId, ref products
+  - title: String
+  - image: String
+  - price: Number
+  - quantity: Number
+- totalPrice: Number, default 0
+- createdAt
+- updatedAt
+
+Note:
+- One user should have only one cart.
+- If product already exists in cart, increase quantity instead of adding duplicate item.
+
+
+7) WISHLISTS COLLECTION
+-----------------------
+Purpose:
+- Store user's wishlist products.
+
+Fields:
+- _id
+- user: ObjectId, ref users, required
+- products: [ObjectId]
+- createdAt
+- updatedAt
+
+
+8) COUPONS COLLECTION
+---------------------
+Purpose:
+- Store discount coupons.
+
+Fields:
+- _id
+- code: String, required, unique
+- discountType: String, enum percentage, fixed
+- discountValue: Number, required
+- minimumAmount: Number, default 0
+- maximumDiscount: Number, optional
+- usageLimit: Number, optional
+- usedCount: Number, default 0
+- expiryDate: Date, required
+- isActive: Boolean, default true
+- createdBy: ObjectId, optional
+- updatedBy: ObjectId, optional
+- createdAt
+- updatedAt
+
+
+9) ORDERS COLLECTION
+--------------------
+Purpose:
+- Store final placed order.
+- Copy items and shipping address at order time.
+
+Fields:
+- _id
+- user: ObjectId, ref users, required
+- items: Array
+  - product: ObjectId, optional
+  - title: String, required
+  - image: String, optional
+  - price: Number, required
+  - quantity: Number, required
+- shippingAddress: Object, required
+  - fullName: String
+  - mobile: String
+  - addressLine1: String
+  - addressLine2: String
+  - landmark: String
+  - city: String
+  - state: String
+  - pincode: String
+  - country: String
+- paymentMethod: String, enum COD, Razorpay, Stripe
+- paymentStatus: String, enum Pending, Paid, Failed
+- orderStatus: String, enum Processing, Packed, Shipped, Out for Delivery, Delivered, Cancelled
+- itemsPrice: Number, default 0
+- taxPrice: Number, default 0
+- shippingPrice: Number, default 0
+- discountAmount: Number, default 0
+- totalPrice: Number, default 0
+- couponCode: String, optional
+- isPaid: Boolean, default false
+- paidAt: Date, optional
+- deliveredAt: Date, optional
+- createdAt
+- updatedAt
+
+Important:
+- shippingAddress in orders should be copied from addresses collection.
+- Do not only store address id in order.
+- If user changes address later, old order address must stay unchanged.
+
+Example:
+{
+  _id: ObjectId,
+  user: ObjectId,
+  items: [
+    {
+      product: ObjectId,
+      title: "iPhone 15",
+      image: "img1.jpg",
+      price: 69999,
+      quantity: 1
+    }
+  ],
+  shippingAddress: {
+    fullName: "Rahul Sharma",
+    mobile: "9876543210",
+    addressLine1: "House 12, MG Road",
+    addressLine2: "Near Temple",
+    landmark: "Opposite market",
+    city: "Ahmedabad",
+    state: "Gujarat",
+    pincode: "380001",
+    country: "India"
+  },
+  paymentMethod: "COD",
+  paymentStatus: "Pending",
+  orderStatus: "Processing",
+  itemsPrice: 69999,
+  taxPrice: 0,
+  shippingPrice: 0,
+  discountAmount: 0,
+  totalPrice: 69999,
+  couponCode: "",
+  isPaid: false
+}
+
+
+10) PAYMENTS COLLECTION
+-----------------------
+Purpose:
+- Store online payment transaction details.
+
+Fields:
+- _id
+- user: ObjectId, ref users, required
+- order: ObjectId, ref orders, required
+- paymentGateway: String, enum Razorpay, Stripe
+- transactionId: String, required
+- amount: Number, required
+- status: String, enum Pending, Success, Failed
+- gatewayResponse: Object, optional
+- createdAt
+- updatedAt
+
+Note:
+- COD orders may not need full online payment record.
+
+
+11) REVIEWS COLLECTION
+----------------------
+Purpose:
+- Store product reviews and ratings.
+
+Fields:
+- _id
+- user: ObjectId, ref users, required
+- product: ObjectId, ref products, required
+- rating: Number, min 1, max 5
+- comment: String, optional
+- createdAt
+- updatedAt
+
+Rule:
+- One user should review one product only once.
+
+
+PROJECT FLOW
+============
+1. Register user
+- Save data in users collection.
+- Do not ask for address here.
+
+2. Login user
+- Verify email and password.
+
+3. Add address
+- Save in addresses collection.
+- User may save multiple addresses.
+
+4. Browse products
+- Read from categories, brands, products.
+
+5. Add to cart
+- Create cart if not exists.
+- Add or update item in carts collection.
+
+6. Checkout
+- Fetch cart data.
+- Fetch saved addresses.
+- User selects one address and payment method.
+
+7. Place order
+- Copy cart items into orders.items
+- Copy selected address into orders.shippingAddress
+- Save final pricing fields
+
+8. Payment
+- If COD: keep payment pending or unpaid initially
+- If Razorpay or Stripe: save transaction in payments collection
+
+9. Update stock
+- Decrease products.stock
+- Increase products.sold
+
+10. Clear cart
+- Remove items from cart after successful order
+
+11. Delivery and review
+- Update orderStatus
+- After delivery, allow review in reviews collection
+
+
+BEST ANSWER FOR YOUR ADDRESS CONFUSION
+======================================
+- Address should NOT be inside user registration form.
+- Address should NOT be required in users collection.
+- Address should be stored separately in addresses collection.
+- Final selected address should be copied into orders collection during checkout.
+
+
+FINAL COLLECTION LIST
+=====================
+- users
+- addresses
+- categories
+- brands
+- products
+- carts
+- wishlists
+- coupons
+- orders
+- payments
+- reviews

@@ -1,0 +1,47 @@
+http://localhost:5000/api/auth/register
+
+{
+  "name": "Utsav Parmar",
+  "email": "utsav@example.com",
+  "password": "mysecurepassword123",
+  "phone": "9998887776",
+  "avatar": "https://example.com/avatar.jpg"
+}
+
+
+http://localhost:5000/api/auth/login
+
+{
+  "email": "utsav@example.com",
+  "password": "brandnewpassword987"
+}
+
+{
+    "_id": "6a0ed4e71ed1fa4854488b2e",
+    "name": "Utsav Parmar",
+    "email": "utsav@example.com",
+    "phone": "9998887776",
+    "avatar": "https://example.com/avatar.jpg",
+    "role": "user",
+    "is_verified": false,
+    "is_blocked": false,
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhMGVkNGU3MWVkMWZhNDg1NDQ4OGIyZSIsImlhdCI6MTc3OTM1ODUxMSwiZXhwIjoxNzc5NDQ0OTExfQ.CS1ER1zETDBcytH-R_gYFd_cZ1aaiGE7nynsqKzA5xI"
+}
+
+ Get User Profile (http://localhost:5000/api/auth/profile
+
+Logout User:http://localhost:5000/api/auth/logout	
+
+
+
+Here is the clear explanation of how the tokens are stored and used in Postman vs. the Frontend, followed by a concrete, step-by-step example of how to perform the Profile Update.
+
+🔑 Where are the tokens stored?
+1. The Refresh Token
+Where it goes: Saved automatically inside Postman's Cookie Jar (you can see it in the "Cookies" link right below the Send button in Postman).
+Why? The backend server returns this token using a Set-Cookie header. Postman behaves like a browser and saves it automatically. It will automatically send this cookie whenever you call the /api/auth/refresh or /api/auth/logout endpoints.
+2. The Access Token
+Where it goes: It is returned in the JSON Response Body (e.g. { "accessToken": "eyJhb..." }).
+Where is it stored?
+In Postman: It is not automatically stored. You must copy the value of "accessToken" from the login response body. Then, in your protected requests (like GET Profile or PUT Profile), go to the Authorization tab, select Bearer Token, and paste it there.
+In the React Frontend (When we build it): The React app will receive the access token from the API response and keep it in memory (React State/RAM). It is never stored in localStorage or cookies to protect against XSS (Cross-Site Scripting) attacks. When the user closes or refreshes the page, the in-memory token is lost, and React will automatically request a new one from /api/auth/refresh using the secure HTTP-only refresh cookie.
